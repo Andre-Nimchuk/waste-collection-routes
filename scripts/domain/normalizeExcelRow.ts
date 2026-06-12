@@ -1,0 +1,153 @@
+import { parseExcelDateToken } from "./parseRouteHeader";
+import type {
+  ExcelRow,
+  ParsedRouteHeader,
+  ParsedRouteStop,
+  RawRouteRow,
+  RouteParseWarning,
+} from "./routeTypes";
+
+type NormalizedExcelRowResult =
+  | {
+      kind: "stop";
+      stop: ParsedRouteStop;
+    }
+  | {
+      kind: "skip";
+      warning?: RouteParseWarning;
+    };
+
+export function normalizeExcelRow(
+  row: ExcelRow,
+  rowNumber: number,
+  currentRoute: ParsedRouteHeader | null,
+): NormalizedExcelRowResult {
+  const raw = toRawRouteRow(row, rowNumber);
+
+  if (!hasMeaningfulCells(raw)) {
+    return { kind: "skip" };
+  }
+
+  if (!currentRoute) {
+    return {
+      kind: "skip",
+      warning: {
+        rowNumber,
+        reason: "Stop-like row appeared before a route header.",
+        raw,
+      },
+    };
+  }
+
+  if (isRouteTotalRow(raw)) {
+    return { kind: "skip" };
+  }
+
+  const routeOrder = parseInteger(raw.routeOrder);
+  const originalAddress = normalizeText(raw.originalAddress);
+
+  if (!originalAddress && routeOrder === null) {
+    return { kind: "skip" };
+  }
+
+  if (!originalAddress || routeOrder === null) {
+    return {
+      kind: "skip",
+      warning: {
+        rowNumber,
+        reason: "Stop row is missing route order or address.",
+        raw,
+      },
+    };
+  }
+
+  const date = parseExcelDateToken(raw.date) ?? currentRoute.routeDate;
+
+  return {
+    kind: "stop",
+    stop: {
+      id: `${currentRoute.routeId}-${routeOrder}-${rowNumber}`,
+      routeId: currentRoute.routeId,
+      routeNumber: currentRoute.routeNumber,
+      routeDate: currentRoute.routeDate,
+      date,
+      timeSpentInObject: normalizeText(raw.timeSpentInObject),
+      binCode: normalizeText(raw.binCode),
+      serviceDayPattern: normalizeText(raw.serviceDayPattern),
+      frequencyCode: normalizeText(raw.frequencyCode),
+      routeOrder,
+      originalAddress,
+      binVolume: parseDecimal(raw.binVolume),
+      containerCount: parseInteger(raw.containerCount),
+      raw,
+    },
+  };
+}
+
+export function toRawRouteRow(row: ExcelRow, rowNumber: number): RawRouteRow {
+  return {
+    rowNumber,
+    routeHeader: cellToText(row[0] ?? null),
+    date: cellToText(row[1] ?? null),
+    timeSpentInObject: cellToText(row[2] ?? null),
+    binCode: cellToText(row[3] ?? null),
+    serviceDayPattern: cellToText(row[4] ?? null),
+    frequencyCode: cellToText(row[5] ?? null),
+    routeOrder: cellToText(row[6] ?? null),
+    originalAddress: cellToText(row[7] ?? null),
+    binVolume: cellToText(row[8] ?? null),
+    containerCount: cellToText(row[9] ?? null),
+  };
+}
+
+function isRouteTotalRow(raw: RawRouteRow): boolean {
+  const address = normalizeText(raw.originalAddress);
+
+  return (
+    address === "Total:" ||
+    address === "Kopā ML:" ||
+    (raw.routeOrder === "0" && !address && parseInteger(raw.containerCount) === 0)
+  );
+}
+
+function hasMeaningfulCells(raw: RawRouteRow): boolean {
+  return Object.entries(raw).some(([key, value]) => key !== "rowNumber" && Boolean(value));
+}
+
+function cellToText(value: ExcelRow[number]): string | null {
+  if (value === null) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  const text = String(value).trim();
+
+  return text.length > 0 ? text : null;
+}
+
+function normalizeText(value: string | null): string | null {
+  const text = value?.trim();
+
+  return text ? text : null;
+}
+
+function parseDecimal(value: string | null): number | null {
+  const normalizedValue = value?.replace(",", ".").trim();
+
+  if (!normalizedValue) {
+    return null;
+  }
+
+  const parsedValue = Number(normalizedValue);
+
+  return Number.isFinite(parsedValue) ? parsedValue : null;
+}
+
+function parseInteger(value: string | null): number | null {
+  const parsedValue = parseDecimal(value);
+
+  return parsedValue !== null && Number.isInteger(parsedValue) ? parsedValue : null;
+}

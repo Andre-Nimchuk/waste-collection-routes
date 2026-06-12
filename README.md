@@ -1,56 +1,126 @@
-# Welcome to your Expo app 👋
+# Waste Routes Test
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo React Native technical test for waste collection route visualization.
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Quick Start
 
 ```bash
-npm run reset-project
+yarn install
+yarn parse:excel
+yarn ios
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Alternative app start:
 
-### Other setup steps
+```bash
+yarn start
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Then press `i` to open the app in the iOS Simulator.
 
-## Learn more
+## Scripts
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+yarn parse:excel     # read Excel and generate src/data/routes.json
+yarn prepare:data    # planned full local data pipeline
+yarn geocode         # planned geocoding step
+yarn generate:week   # planned weekly dataset generation
+yarn lint            # Biome check
+yarn lint:fix        # Biome auto-fix
+yarn typecheck       # TypeScript check
+yarn ios             # start on iOS Simulator
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Goal
 
-## Join the community
+The app should process the provided Excel file, geocode addresses, display at least one week of waste collection locations on a map, connect stops by the original route order, and show route statistics and bin information.
 
-Join our community of developers creating universal apps.
+## Architecture
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Data flow:
+
+```txt
+Excel file -> local Node.js scripts -> generated JSON -> Expo app -> map/statistics UI
+```
+
+Main rules:
+
+- Excel is parsed only in `scripts/`.
+- Heavy geocoding will run only in local scripts, not in the mobile UI.
+- React Native UI will consume generated JSON from `src/data/`.
+- Route visualization is grouped by `routeId + date` and sorted by `routeOrder`.
+- The route order from Excel is preserved. No route optimization is performed.
+
+## Current Status
+
+Done:
+
+- Excel reader.
+- Route header detection, for example `ML 11840 no 01.01.26`.
+- Forward-fill of the current route into following stop rows.
+- Route date normalization to `yyyy-mm-dd`.
+- Route order parsing.
+- Raw row preservation.
+- Generated `src/data/routes.json`.
+
+Parser result:
+
+```txt
+totalRows: 79998
+parsedStops: 79552
+routeCount: 430
+routeHeadersDetected: 437
+invalidRows: 0
+```
+
+`routeHeadersDetected` is higher than `routeCount` because some route headers in the Excel file are empty/zero routes without valid stops.
+
+## Generated Data
+
+Generated JSON files are ignored by git:
+
+```gitignore
+src/data/*.json
+```
+
+This keeps large generated artifacts out of the repository. The parser can regenerate them locally.
+
+## Parsed Stop Shape
+
+`src/data/routes.json` contains stops with:
+
+```txt
+id
+routeId
+routeNumber
+routeDate
+date
+timeSpentInObject
+binCode
+serviceDayPattern
+frequencyCode
+routeOrder
+originalAddress
+binVolume
+containerCount
+raw
+```
+
+## Planned Next Steps
+
+1. Domain parsers: service days, frequency, address normalization.
+2. Geocoding with cache.
+3. One-week dataset and route statistics.
+4. Deterministic route insights.
+5. Map UI with markers and route polylines.
+6. Route details and bin information UI.
+
+## QA
+
+Current parser milestone was checked with:
+
+```bash
+yarn lint
+yarn typecheck
+yarn parse:excel
+```
