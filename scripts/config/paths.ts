@@ -9,6 +9,25 @@ export const inputRoutesFilePath = path.join(
 );
 
 export const parsedRoutesOutputPath = path.join(projectRoot, "src", "data", "routes.json");
+export const geocodedRoutesOutputPath = path.join(
+  projectRoot,
+  "src",
+  "data",
+  "routes-geocoded.json",
+);
+export const geocodedAddressesOutputPath = path.join(
+  projectRoot,
+  "src",
+  "data",
+  "geocoded-addresses.json",
+);
+export const failedGeocodingOutputPath = path.join(
+  projectRoot,
+  "src",
+  "data",
+  "failed-geocoding.json",
+);
+export const geocodingCachePath = path.join(projectRoot, "cache", "geocoding-cache.json");
 
 export function toProjectRelativePath(filePath: string): string {
   return path.relative(projectRoot, filePath);

@@ -38,6 +38,7 @@ yarn-error.*
 
 # generated data
 src/data/*.json
+cache/*.json
 
 example
 

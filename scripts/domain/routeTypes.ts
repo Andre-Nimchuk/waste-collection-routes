@@ -46,6 +46,15 @@ export type ParsedFrequency = {
   label: string;
 };
 
+export type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
+export type GeocodingStatus = "pending" | "geocoded" | "failed";
+
+export type GeocodingProviderName = "nominatim";
+
 export type ParsedRouteStop = {
   id: string;
   routeId: string;
@@ -63,9 +72,31 @@ export type ParsedRouteStop = {
   frequency: ParsedFrequency;
   binVolume: number | null;
   containerCount: number | null;
-  geocodingStatus: "pending";
+  coordinates: Coordinates | null;
+  geocodingStatus: GeocodingStatus;
+  geocodingProvider: GeocodingProviderName | null;
+  geocodingError: string | null;
   raw: RawRouteRow;
 };
+
+export type GeocodingSuccess = {
+  status: "geocoded";
+  cleanedAddress: string;
+  query: string;
+  provider: GeocodingProviderName;
+  coordinates: Coordinates;
+  displayName: string | null;
+};
+
+export type GeocodingFailure = {
+  status: "failed";
+  cleanedAddress: string;
+  query: string;
+  provider: GeocodingProviderName;
+  error: string;
+};
+
+export type GeocodingCacheEntry = GeocodingSuccess | GeocodingFailure;
 
 export type RouteParseWarning = {
   rowNumber: number;

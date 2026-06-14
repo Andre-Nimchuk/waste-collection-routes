@@ -86,7 +86,10 @@ export function normalizeExcelRow(
       frequency: parseFrequency(raw.frequencyCode),
       binVolume: parseDecimal(raw.binVolume),
       containerCount: parseInteger(raw.containerCount),
+      coordinates: null,
       geocodingStatus: "pending",
+      geocodingProvider: null,
+      geocodingError: null,
       raw,
     },
   };

@@ -20,3 +20,5 @@ export const knownFrequencyLabels = new Map<number, string>([
   [8, "Once every eight weeks"],
   [12, "Once every twelve weeks"],
 ]);
+
+export const defaultGeocodingContext = "Jelgava, Latvia";

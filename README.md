@@ -7,6 +7,7 @@ Expo React Native technical test for waste collection route visualization.
 ```bash
 yarn install
 yarn parse:excel
+yarn geocode
 yarn ios
 ```
 
@@ -22,8 +23,8 @@ Then press `i` to open the app in the iOS Simulator.
 
 ```bash
 yarn parse:excel     # read Excel and generate src/data/routes.json
+yarn geocode         # geocode unique cleaned addresses with cache
 yarn prepare:data    # planned full local data pipeline
-yarn geocode         # planned geocoding step
 yarn generate:week   # planned weekly dataset generation
 yarn lint            # Biome check
 yarn lint:fix        # Biome auto-fix
@@ -63,6 +64,7 @@ Done:
 - Service day parsing.
 - Frequency parsing.
 - Address normalization.
+- Geocoding with cache.
 - Raw row preservation.
 - Generated `src/data/routes.json`.
 
@@ -84,9 +86,18 @@ Generated JSON files are ignored by git:
 
 ```gitignore
 src/data/*.json
+cache/*.json
 ```
 
 This keeps large generated artifacts out of the repository. The parser can regenerate them locally.
+
+Safe geocoding sample:
+
+```bash
+GEOCODING_LIMIT=25 yarn geocode
+```
+
+Use `GEOCODING_LIMIT=0 yarn geocode` to validate the geocoding pipeline without sending provider requests.
 
 ## Parsed Stop Shape
 
@@ -110,16 +121,17 @@ frequency
 binVolume
 containerCount
 geocodingStatus
+geocodingProvider
+geocodingError
 raw
 ```
 
 ## Planned Next Steps
 
-1. Geocoding with cache.
-2. One-week dataset and route statistics.
-3. Deterministic route insights.
-4. Map UI with markers and route polylines.
-5. Route details and bin information UI.
+1. One-week dataset and route statistics.
+2. Deterministic route insights.
+3. Map UI with markers and route polylines.
+4. Route details and bin information UI.
 
 ## QA
 
@@ -129,4 +141,5 @@ Current parser milestone was checked with:
 yarn lint
 yarn typecheck
 yarn parse:excel
+GEOCODING_LIMIT=0 yarn geocode
 ```
