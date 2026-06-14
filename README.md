@@ -8,6 +8,7 @@ Expo React Native technical test for waste collection route visualization.
 yarn install
 yarn parse:excel
 yarn geocode
+yarn generate:week
 yarn ios
 ```
 
@@ -65,6 +66,8 @@ Done:
 - Frequency parsing.
 - Address normalization.
 - Geocoding with cache.
+- Representative week data generation.
+- Route statistics generation.
 - Raw row preservation.
 - Generated `src/data/routes.json`.
 
@@ -126,12 +129,23 @@ geocodingError
 raw
 ```
 
+## Generated Week Data
+
+`yarn generate:week` creates:
+
+```txt
+src/data/routes-week.json
+src/data/route-stats.json
+src/data/data-summary.json
+```
+
+The week selection is deterministic. It prefers a 7-day window with geocoded stops when available, otherwise it falls back to the earliest available week.
+
 ## Planned Next Steps
 
-1. One-week dataset and route statistics.
-2. Deterministic route insights.
-3. Map UI with markers and route polylines.
-4. Route details and bin information UI.
+1. Deterministic route insights.
+2. Map UI with markers and route polylines.
+3. Route details and bin information UI.
 
 ## QA
 
@@ -142,4 +156,5 @@ yarn lint
 yarn typecheck
 yarn parse:excel
 GEOCODING_LIMIT=0 yarn geocode
+yarn generate:week
 ```

@@ -1,6 +1,3 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-
 import {
   failedGeocodingOutputPath,
   geocodedAddressesOutputPath,
@@ -13,6 +10,7 @@ import type { ParsedRouteStop } from "./domain/routeTypes";
 import { NominatimGeocodingProvider } from "./providers/NominatimGeocodingProvider";
 import { readGeocodingCache, writeGeocodingCache } from "./services/geocodingCacheService";
 import { geocodeRouteStops } from "./services/geocodingService";
+import { readJsonFile, writeJsonFile } from "./utils/jsonFile";
 
 async function main(): Promise<void> {
   const routes = await readRoutes();
@@ -22,30 +20,22 @@ async function main(): Promise<void> {
     limit: getIntegerEnv("GEOCODING_LIMIT"),
   });
 
-  await writeJson(geocodedRoutesOutputPath, result.routes);
-  await writeJson(geocodedAddressesOutputPath, result.geocodedAddresses);
-  await writeJson(failedGeocodingOutputPath, result.failedGeocoding);
+  await writeJsonFile(geocodedRoutesOutputPath, result.routes);
+  await writeJsonFile(geocodedAddressesOutputPath, result.geocodedAddresses);
+  await writeJsonFile(failedGeocodingOutputPath, result.failedGeocoding);
   await writeGeocodingCache(geocodingCachePath, result.cache);
 
   printSummary(result.summary);
 }
 
 async function readRoutes(): Promise<ParsedRouteStop[]> {
-  const content = await readFile(parsedRoutesOutputPath, "utf8");
-  const parsed = JSON.parse(content) as unknown;
+  const parsed = await readJsonFile<unknown>(parsedRoutesOutputPath);
 
   if (!Array.isArray(parsed)) {
     throw new Error(`Expected routes array in ${toProjectRelativePath(parsedRoutesOutputPath)}`);
   }
 
   return parsed as ParsedRouteStop[];
-}
-
-async function writeJson(filePath: string, value: unknown): Promise<void> {
-  await mkdir(path.dirname(filePath), {
-    recursive: true,
-  });
-  await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
 function getIntegerEnv(name: string): number | null {

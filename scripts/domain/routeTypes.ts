@@ -98,6 +98,38 @@ export type GeocodingFailure = {
 
 export type GeocodingCacheEntry = GeocodingSuccess | GeocodingFailure;
 
+export type RouteStats = {
+  routeKey: string;
+  routeId: string;
+  routeNumber: string;
+  date: string;
+  stopCount: number;
+  uniqueAddressCount: number;
+  totalContainers: number;
+  totalBinVolume: number;
+  geocodedStops: number;
+  failedGeocodingStops: number;
+  pendingGeocodingStops: number;
+  serviceDays: string[];
+  frequencies: string[];
+  firstRouteOrder: number;
+  lastRouteOrder: number;
+};
+
+export type DataSummary = {
+  sourceFile: string;
+  generatedFiles: string[];
+  selectedWeekStart: string;
+  selectedWeekEnd: string;
+  totalStops: number;
+  weekStops: number;
+  routeCount: number;
+  uniqueAddressCount: number;
+  geocodedStops: number;
+  failedGeocodingStops: number;
+  pendingGeocodingStops: number;
+};
+
 export type RouteParseWarning = {
   rowNumber: number;
   reason: string;

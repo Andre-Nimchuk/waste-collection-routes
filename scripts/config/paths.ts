@@ -27,6 +27,9 @@ export const failedGeocodingOutputPath = path.join(
   "data",
   "failed-geocoding.json",
 );
+export const weekRoutesOutputPath = path.join(projectRoot, "src", "data", "routes-week.json");
+export const routeStatsOutputPath = path.join(projectRoot, "src", "data", "route-stats.json");
+export const dataSummaryOutputPath = path.join(projectRoot, "src", "data", "data-summary.json");
 export const geocodingCachePath = path.join(projectRoot, "cache", "geocoding-cache.json");
 
 export function toProjectRelativePath(filePath: string): string {

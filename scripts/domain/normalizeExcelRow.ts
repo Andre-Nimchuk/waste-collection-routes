@@ -1,3 +1,4 @@
+import { parseDecimal, parseInteger } from "../utils/number";
 import { normalizeOptionalText } from "../utils/text";
 import { normalizeAddress } from "./normalizeAddress";
 import { parseFrequency } from "./parseFrequency";
@@ -137,22 +138,4 @@ function cellToText(value: ExcelRow[number]): string | null {
   const text = String(value).trim();
 
   return text.length > 0 ? text : null;
-}
-
-function parseDecimal(value: string | null): number | null {
-  const normalizedValue = value?.replace(",", ".").trim();
-
-  if (!normalizedValue) {
-    return null;
-  }
-
-  const parsedValue = Number(normalizedValue);
-
-  return Number.isFinite(parsedValue) ? parsedValue : null;
-}
-
-function parseInteger(value: string | null): number | null {
-  const parsedValue = parseDecimal(value);
-
-  return parsedValue !== null && Number.isInteger(parsedValue) ? parsedValue : null;
 }
