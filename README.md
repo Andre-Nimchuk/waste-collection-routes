@@ -60,6 +60,9 @@ Done:
 - Forward-fill of the current route into following stop rows.
 - Route date normalization to `yyyy-mm-dd`.
 - Route order parsing.
+- Service day parsing.
+- Frequency parsing.
+- Address normalization.
 - Raw row preservation.
 - Generated `src/data/routes.json`.
 
@@ -101,19 +104,22 @@ serviceDayPattern
 frequencyCode
 routeOrder
 originalAddress
+cleanedAddress
+serviceDays
+frequency
 binVolume
 containerCount
+geocodingStatus
 raw
 ```
 
 ## Planned Next Steps
 
-1. Domain parsers: service days, frequency, address normalization.
-2. Geocoding with cache.
-3. One-week dataset and route statistics.
-4. Deterministic route insights.
-5. Map UI with markers and route polylines.
-6. Route details and bin information UI.
+1. Geocoding with cache.
+2. One-week dataset and route statistics.
+3. Deterministic route insights.
+4. Map UI with markers and route polylines.
+5. Route details and bin information UI.
 
 ## QA
 

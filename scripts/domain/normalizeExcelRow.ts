@@ -1,4 +1,8 @@
+import { normalizeOptionalText } from "../utils/text";
+import { normalizeAddress } from "./normalizeAddress";
+import { parseFrequency } from "./parseFrequency";
 import { parseExcelDateToken } from "./parseRouteHeader";
+import { parseServiceDays } from "./parseServiceDays";
 import type {
   ExcelRow,
   ParsedRouteHeader,
@@ -44,7 +48,7 @@ export function normalizeExcelRow(
   }
 
   const routeOrder = parseInteger(raw.routeOrder);
-  const originalAddress = normalizeText(raw.originalAddress);
+  const originalAddress = normalizeOptionalText(raw.originalAddress);
 
   if (!originalAddress && routeOrder === null) {
     return { kind: "skip" };
@@ -71,14 +75,18 @@ export function normalizeExcelRow(
       routeNumber: currentRoute.routeNumber,
       routeDate: currentRoute.routeDate,
       date,
-      timeSpentInObject: normalizeText(raw.timeSpentInObject),
-      binCode: normalizeText(raw.binCode),
-      serviceDayPattern: normalizeText(raw.serviceDayPattern),
-      frequencyCode: normalizeText(raw.frequencyCode),
+      timeSpentInObject: normalizeOptionalText(raw.timeSpentInObject),
+      binCode: normalizeOptionalText(raw.binCode),
+      serviceDayPattern: normalizeOptionalText(raw.serviceDayPattern),
+      frequencyCode: normalizeOptionalText(raw.frequencyCode),
       routeOrder,
       originalAddress,
+      cleanedAddress: normalizeAddress(originalAddress),
+      serviceDays: parseServiceDays(raw.serviceDayPattern),
+      frequency: parseFrequency(raw.frequencyCode),
       binVolume: parseDecimal(raw.binVolume),
       containerCount: parseInteger(raw.containerCount),
+      geocodingStatus: "pending",
       raw,
     },
   };
@@ -101,7 +109,7 @@ export function toRawRouteRow(row: ExcelRow, rowNumber: number): RawRouteRow {
 }
 
 function isRouteTotalRow(raw: RawRouteRow): boolean {
-  const address = normalizeText(raw.originalAddress);
+  const address = normalizeOptionalText(raw.originalAddress);
 
   return (
     address === "Total:" ||
@@ -126,12 +134,6 @@ function cellToText(value: ExcelRow[number]): string | null {
   const text = String(value).trim();
 
   return text.length > 0 ? text : null;
-}
-
-function normalizeText(value: string | null): string | null {
-  const text = value?.trim();
-
-  return text ? text : null;
 }
 
 function parseDecimal(value: string | null): number | null {

@@ -23,6 +23,29 @@ export type ParsedRouteHeader = {
   routeDate: string;
 };
 
+export type ServiceDayName =
+  | "Monday"
+  | "Tuesday"
+  | "Wednesday"
+  | "Thursday"
+  | "Friday"
+  | "Saturday"
+  | "Sunday";
+
+export type ParsedServiceDays = {
+  original: string | null;
+  status: "known" | "unknown";
+  days: ServiceDayName[];
+  label: string;
+};
+
+export type ParsedFrequency = {
+  original: string | null;
+  status: "known" | "custom" | "unknown";
+  intervalWeeks: number | null;
+  label: string;
+};
+
 export type ParsedRouteStop = {
   id: string;
   routeId: string;
@@ -35,8 +58,12 @@ export type ParsedRouteStop = {
   frequencyCode: string | null;
   routeOrder: number;
   originalAddress: string;
+  cleanedAddress: string;
+  serviceDays: ParsedServiceDays;
+  frequency: ParsedFrequency;
   binVolume: number | null;
   containerCount: number | null;
+  geocodingStatus: "pending";
   raw: RawRouteRow;
 };
 
